@@ -1,7 +1,14 @@
 let introSize;
 let introHeightBase = 160;
 
+let floodHeight = 0;
+let floodBarsX = 0;
+let floodBarsY;
+let floodBarsBass;
+let floodBarsOther;
+
 let vignette_fadeout_elapsed = 0;
+let sirenrotation = 0;
 
 let warningIntroAlpha = 0;
 let warningHoriOffset = 0;
@@ -31,10 +38,6 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
    rectMode(CENTER)
    textAlign(CENTER);
    textSize(24);
-  
-   let bar_spacing = height / 10;
-   let bar_height = width / 12;
-   let bar_pos_x = width / 2;
 
    let warningCyan = color(100,200,255);
    let warningRed = color(255);
@@ -42,9 +45,17 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
    if (counter == 0) {
       introHeightBase = 320;
 
+      floodHeight = 0;
+      floodBarsX = 0;
+      floodBarsY = height/2;
+
       warningIntroAlpha = 0;
       warningHoriOffset = 0;
       warningRiseOffset = 0;
+      sirenrotation = 0;
+
+      bar_fadeout_elapsed = 100;
+
 
       coreSizeBase = 0;
 
@@ -55,9 +66,6 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
 
 // changes 
 
-   for (let i = 0; i < 5; i++){
-      circle(i*75,0, 50);
-   }
 
    //Intro
    if (counter > 36 && counter < 600) {
@@ -101,6 +109,48 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
          ellipse(0,0, (width*0.9)-(width*i*0.025),(height*0.9)-(height*i*0.025))
       }
       vignette_fadeout_elapsed += 3.5;
+   }
+
+   //Siren Effect
+   if (counter > 1860 && counter < 4313){
+      fill(255,0,0,128);
+      translate(0,-height/1.5);
+      rotate(sirenrotation);
+      beginShape();
+      vertex(width*2,height/2);
+      vertex(-width*2,-height/2);
+      vertex(-width*2,height/2);
+      vertex(width*2,-height/2);
+      endShape(CLOSE);
+      rotate(-sirenrotation);
+      translate(0,height/1.5);
+      sirenrotation+=2;
+   }
+
+   //Intro Flood Effects (Bass?)
+   if (counter > 120 && counter < 5000) {
+      floodBarsBass = map(bass, 0,100, floodHeight,floodHeight*1.25)
+      floodBarsX = -width/2-((counter*3) % width*.72);
+      if (counter > 1860){
+         warningColorRange = map(drum, 0,100, 0,1);
+         warningColor = lerpColor(warningCyan,warningRed, warningColorRange);
+         fill(warningColor);
+      } else {
+        fill(100,200,255);
+      }
+      if (floodHeight < 420 && counter < 1500) {
+         floodHeight+=0.5;
+      } else if (floodHeight > 160 && counter < 1860) {
+         floodHeight-=0.5;
+      } else if (counter > 4302) {
+         floodBarsY+=0.5;
+      }
+
+      //rect(0,height/2, width, floodHeight);
+      for (let i = 0; i < 360; i++){
+         rect(floodBarsX,floodBarsY, (width/100)+4,floodBarsBass+(sin(i*5)*height/25));
+         floodBarsX+=(width/100);
+      }
    }
 
    //Rising Blasts
@@ -200,7 +250,7 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
       BarDrum = map(drum, 0,100, coreSizeBase*1.25,coreSizeBase*1.75);
       BarBass = map(bass, 0,100, coreSizeBase*1.25,coreSizeBase*1.75);
       BarOther = map(other, 0,100, coreSizeBase*1.25,coreSizeBase*1.75);
-      if (counter > 7410) {
+      if (counter > 7410 && bar_fadeout_elapsed > 1) {
       bar_fadeout_elapsed -=1;
       }
       for (let i = 0; i < 120; i++) {
