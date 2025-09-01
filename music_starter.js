@@ -9,6 +9,12 @@ let warningRiseOffset = 0;
 let warningColorRange;
 let warningColor;
 
+let BarBass;
+let BarDrum;
+let BarOther;
+let BarVocal;
+let bar_fadeout_elapsed = 100;
+
 let coreSize;
 let coreSize2;
 let coreSizeBase = 0;
@@ -84,7 +90,7 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
       rect(0,0, width,height);
       fill(20,32);
       for (let i = 0; i < 12; i++){
-         ellipse(0,0, (width*0.8)-(width*i*0.025),(height*0.8)-(height*i*0.025))
+         ellipse(0,0, (width*0.9)-(width*i*0.025),(height*0.9)-(height*i*0.025))
       }
       vignette_fadeout_elapsed += 3.5;
    } else if (counter > 3270 && vignette_fadeout_elapsed < 140) {
@@ -92,7 +98,7 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
       rect(0,0, width,height);
       fill(20,32);
       for (let i = 0; i < 12; i++){
-         ellipse(0,0, (width*0.8)-(width*i*0.025),(height*0.8)-(height*i*0.025))
+         ellipse(0,0, (width*0.9)-(width*i*0.025),(height*0.9)-(height*i*0.025))
       }
       vignette_fadeout_elapsed += 3.5;
    }
@@ -185,7 +191,29 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
       circle(0,0, chargeSizeBase+(x*2));
 
       fill(255,chargeAlpha);
-      circle(0,0, chargeSizeBase+(x/4));
+      circle(0,0, chargeSizeBase+(x/1.5));
+   }
+
+   //Blast Bars
+   if (counter > 6330) {
+      BarVocal = map(vocal, 0,100, coreSizeBase*1.25,coreSizeBase*1.75);
+      BarDrum = map(drum, 0,100, coreSizeBase*1.25,coreSizeBase*1.75);
+      BarBass = map(bass, 0,100, coreSizeBase*1.25,coreSizeBase*1.75);
+      BarOther = map(other, 0,100, coreSizeBase*1.25,coreSizeBase*1.75);
+      if (counter > 7410) {
+      bar_fadeout_elapsed -=1;
+      }
+      for (let i = 0; i < 120; i++) {
+         fill(113,225,255);
+         rect(0,0, 5,BarVocal*(bar_fadeout_elapsed/100));
+         rotate(3);
+         rect(0,0, 5,BarDrum*(bar_fadeout_elapsed/100));
+         rotate(3);                                                                                                 
+         rect(0,0, 5,BarBass*(bar_fadeout_elapsed/100));
+         rotate(3);
+         rect(0,0, 5,BarOther*(bar_fadeout_elapsed/100));
+         rotate(3);
+      }
    }
 
 
@@ -195,17 +223,26 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
          coreSizeBase++;
       } else if (coreSizeBase > 28 && counter > 6144 && counter < 6330) {
          coreSizeBase-=14;
-      } else if (counter > 6330) {
+      } else if (counter == 6330) {
          coreSizeBase = 250;
+      } else if (counter > 6330 && counter < 7410) {
+         coreSizeBase+=0.5;
       }
 
-      coreSize = map(vocal, 0,100, coreSizeBase*1,coreSizeBase*1.25);
-      fill(255);
-      circle(0,0, coreSize);
+      if (counter <= 6330) {
+         coreSize = map(vocal, 0,100, coreSizeBase*1,coreSizeBase*1.25);
+         fill(255);
+         circle(0,0, coreSize);
 
-      coreSize2 = map(vocal, 0,100, coreSizeBase*1.1,coreSizeBase*1.35);
-      fill(100,200,255,128);
-      circle(0,0, coreSize2);
+         coreSize2 = map(vocal, 0,100, coreSizeBase*1.1,coreSizeBase*1.35);
+         fill(100,200,255,128);
+         circle(0,0, coreSize2);
+      } else {
+         fill(255);
+         circle(0,0, coreSizeBase);
+         fill(100,200,255,128);
+         circle(0,0, coreSizeBase*1.1);
+      }
    }
 
 }
