@@ -2,10 +2,22 @@ let introSize;
 let introHeightBase = 160;
 
 let floodHeight = 0;
+let floodSub1Height = 0;
+let floodSub2Height = 0;
 let floodBarsX = 0;
+let floodSub1BarsX = 0;
+let floodSub2BarsX = 0;
 let floodBarsY;
+let floodBarsSubY;
 let floodBarsBass;
 let floodBarsOther;
+let floodBarsDrums;
+
+let introVisualizerX;
+let introVisualizerTimes = [816,842,876, 900,930,960, 984,1020,1050, 1074,1104,1134, 1158,1194,1224, 1248,1278,1308, 1332,1368,1398, 1416,1452,1484];
+
+let visualBarsFlash2Red;
+let visualBarsFlash2Blue;
 
 let vignette_fadeout_elapsed = 0;
 let sirenrotation = 0;
@@ -40,18 +52,28 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
    textSize(24);
 
    let warningCyan = color(100,200,255);
-   let warningRed = color(255);
+   let warningWhite = color(255);
+   let warningRed = color(255,0,0);
 
    if (counter == 0) {
       introHeightBase = 320;
 
       floodHeight = 0;
+      floodSub1Height = -(height/10);
+      floodSub2Height = -(height/25);
       floodBarsX = 0;
+      floodBarsSub1X = 0;
+      floodBarsSub2X = 0;
       floodBarsY = height/2;
+      floodSubBarsY = (height/2)-(height/25);
+
+      introVisualizerX = -width/4;
+
 
       warningIntroAlpha = 0;
       warningHoriOffset = 0;
       warningRiseOffset = 0;
+      vignette_fadeout_elapsed = 0;
       sirenrotation = 0;
 
       bar_fadeout_elapsed = 100;
@@ -127,29 +149,82 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
       sirenrotation+=2;
    }
 
-   //Intro Flood Effects (Bass?)
+   //Intro Flood Effects 
+   //Sub2
+   if (counter > 460 && counter < 1860) {
+      floodBarsDrums = map(drum, 0,100, floodHeight+floodSub2Height,(floodHeight+floodSub2Height)*1.25)
+      floodBarsSub2X = width/2+((counter*2) % width*.72);
+      fill(100,200,255,64);
+      if (floodSub2Height < 120 && counter < 1512) {
+         floodSub2Height+=10;
+      } else if (floodSub2Height > -(height/3) && counter > 1512){
+         floodSub2Height-=3;
+      }
+
+      for (let i = 0; i < 360; i++){
+         rect(floodBarsSub2X,floodSubBarsY, (width/100)+4,floodBarsDrums+(sin(i*5)*height/25));
+         floodBarsSub2X-=(width/100);
+      }
+   }
+   //Sub1
+   if (counter > 420 && counter < 1860) {
+      floodBarsOther = map(other, 0,100, floodHeight+floodSub1Height,(floodHeight+floodSub1Height)*1.25)
+      floodBarsSub1X = width/2+((counter*1) % width*.72);
+      fill(100,200,255,128);
+      if (floodSub1Height < 60 && counter < 1512) {
+         floodSub1Height+=5;
+      } else if (floodSub1Height > -(height/5) && counter > 1512){
+         floodSub1Height-=1.5;
+      }
+
+      for (let i = 0; i < 360; i++){
+         rect(floodBarsSub1X,floodSubBarsY, (width/100)+4,floodBarsOther+(sin(i*5)*height/25));
+         floodBarsSub1X-=(width/100);
+      }
+   }
+   //Main
    if (counter > 120 && counter < 5000) {
       floodBarsBass = map(bass, 0,100, floodHeight,floodHeight*1.25)
       floodBarsX = -width/2-((counter*3) % width*.72);
       if (counter > 1860){
          warningColorRange = map(drum, 0,100, 0,1);
-         warningColor = lerpColor(warningCyan,warningRed, warningColorRange);
+         warningColor = lerpColor(warningCyan,warningWhite, warningColorRange);
          fill(warningColor);
       } else {
         fill(100,200,255);
       }
-      if (floodHeight < 420 && counter < 1500) {
+      if (floodHeight < 420 && counter < 1512) {
          floodHeight+=0.5;
       } else if (floodHeight > 160 && counter < 1860) {
          floodHeight-=0.5;
       } else if (counter > 4302) {
          floodBarsY+=0.5;
       }
-
-      //rect(0,height/2, width, floodHeight);
       for (let i = 0; i < 360; i++){
          rect(floodBarsX,floodBarsY, (width/100)+4,floodBarsBass+(sin(i*5)*height/25));
          floodBarsX+=(width/100);
+      }
+   }
+
+   //VisualBars
+   if (counter > 816) {
+      introVisualizerX = -width/4;
+      for (let i = 0; i < 24; i++) {
+         if (counter > 1686){
+            fill(255,0,0);
+         } else if (counter > 1512){
+            visualBarsRedElapsed = map(counter, 1512,1686, 0,1);
+            visualBarsFlash2Red = lerpColor(warningWhite,warningRed, visualBarsRedElapsed);
+            fill(visualBarsFlash2Red);
+         } else if (counter > introVisualizerTimes[i]) {
+            visualBarsBlueElapsed = map(counter, introVisualizerTimes[i],introVisualizerTimes[i]+15, 0,1);
+            visualBarsFlash2Blue = lerpColor(warningWhite,warningCyan, visualBarsBlueElapsed);
+            fill(visualBarsFlash2Blue);
+         } else {
+            fill(0,0);
+         }
+         rect(introVisualizerX,0, (width/96),height/5);
+         introVisualizerX += width/48;
       }
    }
 
@@ -158,7 +233,7 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
    if (counter > 1860 && counter < 5000) {
       warningHoriOffset+=0.5;
       warningColorRange = map(drum, 0,100, 0,1);
-      warningColor = lerpColor(warningCyan,warningRed, warningColorRange);
+      warningColor = lerpColor(warningCyan,warningWhite, warningColorRange);
       fill(warningColor);
       //Rising 01
       if (counter < 2208 && warningRiseOffset < height) {
