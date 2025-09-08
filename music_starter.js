@@ -15,9 +15,22 @@ let floodBarsDrums;
 
 let introVisualizerX;
 let introVisualizerTimes = [816,842,876, 900,930,960, 984,1020,1050, 1074,1104,1134, 1158,1194,1224, 1248,1278,1308, 1332,1368,1398, 1416,1452,1484];
+let introVisualizerTypes = [];
+
+let CoreVisualizerX;
+let CoreVisualizerTimes = [4308,4320,4348,4368,4380,4408,4434,4452];
+let CoreVisualizerTypes = [];
+
 
 let visualBarsFlash2Red;
+let visualBarsFlash2RedTransparent;
+let visualBarsFlash2RedCore;
+let visualBarsFlash2RedCoreTransparent;
+
 let visualBarsFlash2Blue;
+let visualBarsFlash2BlueTransparent;
+let visualBarsFlash2BlueCore;
+let visualBarsFlash2BlueCoreTransparent;
 
 let vignette_fadeout_elapsed = 0;
 let sirenrotation = 0;
@@ -32,7 +45,7 @@ let BarBass;
 let BarDrum;
 let BarOther;
 let BarVocal;
-let bar_fadeout_elapsed = 100;
+let bar_fadeout_elapsed = 0;
 
 let coreSize;
 let coreSize2;
@@ -45,15 +58,17 @@ let x;
 // vocal, drum, bass, and other are volumes ranging from 0 to 100
 function draw_one_frame(words, vocal, drum, bass, other, counter) {
    translate(width/2, height/2);
-   background(20)
-   textFont('Verdana'); // please use CSS safe fonts
-   rectMode(CENTER)
+   background(20);
+   textFont('Courier New'); // please use CSS safe fonts
+   rectMode(CENTER);
    textAlign(CENTER);
    textSize(24);
 
    let warningCyan = color(100,200,255);
-   let warningWhite = color(255);
-   let warningRed = color(255,0,0);
+   let warningWhite = color(255,255);
+   let warningRed = color(255,0,0,255);
+   let warningCyanTransparent = color(100,200,255,0);
+   let warningRedTransparent = color(255,0,0,0);
 
    if (counter == 0) {
       introHeightBase = 320;
@@ -68,6 +83,9 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
       floodSubBarsY = (height/2)-(height/25);
 
       introVisualizerX = -width/4;
+      CoreisualizerTypes = [];
+      prepFadeout = 100;
+      introBarValueMulti = 0;
 
 
       warningIntroAlpha = 0;
@@ -76,7 +94,7 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
       vignette_fadeout_elapsed = 0;
       sirenrotation = 0;
 
-      bar_fadeout_elapsed = 100;
+      bar_fadeout_elapsed = 0;
 
 
       coreSizeBase = 0;
@@ -197,7 +215,7 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
          floodHeight+=0.5;
       } else if (floodHeight > 160 && counter < 1860) {
          floodHeight-=0.5;
-      } else if (counter > 4302) {
+      } else if (counter > 4308) {
          floodBarsY+=0.5;
       }
       for (let i = 0; i < 360; i++){
@@ -207,25 +225,169 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
    }
 
    //VisualBars
+   //Intro
    if (counter > 816) {
-      introVisualizerX = -width/4;
+      introVisualizerX = -width/4 + width/96;
+      introVisualizerTypes = [drum*1.5,drum*1.25,drum*.75,drum*.25+other*.25, other*.75,other*1.25,other*1.25,other*.75,other*.25+bass*.25, bass*.75,bass*1.25,bass*1.5];
       for (let i = 0; i < 24; i++) {
-         if (counter > 1686){
+
+         if (i > 11) {
+            introArrayDecider = 23 - i;
+         } else {
+            introArrayDecider = i;
+         }
+
+
+         if (counter > 1860 && counter < 3096 && introBarValueMulti < 100) {
+            introBarValueMulti += 0.5;
+         } else if (counter > 3096 && counter < 3276 && introBarValueMulti > 0) {
+            introBarValueMulti -= 0.025;
+         } else if (counter > 3276 && introBarValueMulti < 100) {
+            introBarValueMulti += 4;
+         }
+         introBarValue = introVisualizerTypes[introArrayDecider]/75*(height/5)
+
+         if (counter > 4750) {
+            fill(warningCyan);
+         } else if (counter > 4470) {
+            visualBarsBlueCoreElapsed = map(counter, 4470,4650, 0,1);
+            visualBarsFlash2BlueCore = lerpColor(warningWhite,warningCyan, visualBarsBlueCoreElapsed);
+            visualBarsFlash2BlueCoreTransparent = lerpColor(warningWhite,warningCyanTransparent, visualBarsBlueCoreElapsed);
+
+            visualBarsBlueCoreSizeElapsed = map(counter, 4470,4538, 0,1);
+
+            if (counter > 4470 && counter < 4751) {
+               fill(visualBarsFlash2BlueCoreTransparent);
+               rect(introVisualizerX,0, (width/96)+visualBarsBlueCoreSizeElapsed*width/250,(height/5)*(prepFadeout/100)+introBarValue+visualBarsBlueCoreSizeElapsed*width/250);
+            }
+            fill(visualBarsFlash2BlueCore);
+         } else if (counter > 1686){
             fill(255,0,0);
          } else if (counter > 1512){
-            visualBarsRedElapsed = map(counter, 1512,1686, 0,1);
+            visualBarsRedElapsed = map(counter, 1512,1572, 0,1);
             visualBarsFlash2Red = lerpColor(warningWhite,warningRed, visualBarsRedElapsed);
+            visualBarsFlash2RedTransparent = lerpColor(warningWhite,warningRedTransparent, visualBarsRedElapsed);
+
+            visualBarsRedSizeElapsed = map(counter, 1512,1528, 0,1);
+
+            if (counter > 1512 && counter < 1687) {
+               fill(visualBarsFlash2RedTransparent);
+               rect(introVisualizerX,0, (width/96)+visualBarsRedSizeElapsed*width/250,(height/5)+visualBarsRedSizeElapsed*width/250);
+            }
             fill(visualBarsFlash2Red);
          } else if (counter > introVisualizerTimes[i]) {
             visualBarsBlueElapsed = map(counter, introVisualizerTimes[i],introVisualizerTimes[i]+15, 0,1);
             visualBarsFlash2Blue = lerpColor(warningWhite,warningCyan, visualBarsBlueElapsed);
+            
+            visualBarsBlueSizeElapsed = map(counter, introVisualizerTimes[i],introVisualizerTimes[i]+45, 0,1); 
+            visualBarsFlash2BlueTransparent = lerpColor(warningWhite,warningCyanTransparent, visualBarsBlueSizeElapsed);
+
+            if (counter > introVisualizerTimes[i] && counter < introVisualizerTimes[i]+60) {
+               fill(visualBarsFlash2BlueTransparent);
+               rect(introVisualizerX,0, (width/96)+visualBarsBlueSizeElapsed*width/100,(height/5)+visualBarsBlueSizeElapsed*width/100);
+            }
             fill(visualBarsFlash2Blue);
+
          } else {
             fill(0,0);
          }
-         rect(introVisualizerX,0, (width/96),height/5);
+      
+         if (counter > 1818 && prepFadeout > 5) {
+            prepFadeout-=0.25;
+         }
+
+         if (counter > 1860) {
+            rect(introVisualizerX,0, (width/96),(height/5)*(prepFadeout/100)+introBarValue*(introBarValueMulti/100));
+         } else {
+            rect(introVisualizerX,0, (width/96),(height/5)*(prepFadeout/100));
+         }
          introVisualizerX += width/48;
+
       }
+   }
+   //Nearing the Core
+   if (counter > 4308) {
+      CoreVisualizerX = -width/4 - width/96;
+      coreVisualizerTypes = [drum*1.5,drum*1.25,drum*.75,drum*.25+vocal*.25, vocal*.75,vocal*1.25,vocal*1.25,vocal*.75];
+      for (let i = 0; i < 8; i++) {
+         coreBarValue = coreVisualizerTypes[i]/75*(height/5)
+
+         if (counter > 4750) {
+            fill(warningCyan);
+         } else if (counter > 4470) {
+            visualBarsBlueCoreElapsed = map(counter, 4470,4650, 0,1);
+            visualBarsFlash2BlueCore = lerpColor(warningWhite,warningCyan, visualBarsBlueCoreElapsed);
+            visualBarsFlash2BlueCoreTransparent = lerpColor(warningWhite,warningCyanTransparent, visualBarsBlueCoreElapsed);
+
+            visualBarsBlueCoreSizeElapsed = map(counter, 4470,4538, 0,1);
+
+            if (counter > 4470 && counter < 4751) {
+               fill(visualBarsFlash2BlueCoreTransparent);
+               rect(CoreVisualizerX,0, (width/96)+visualBarsBlueCoreSizeElapsed*width/250,(height/5)*(0.05)+coreBarValue+visualBarsBlueCoreSizeElapsed*width/250);
+               rect(-CoreVisualizerX,0, (width/96)+visualBarsBlueCoreSizeElapsed*width/250,(height/5)*(0.05)+coreBarValue+visualBarsBlueCoreSizeElapsed*width/250);
+            }
+            fill(visualBarsFlash2BlueCore);
+         } else if (counter > CoreVisualizerTimes[i]){
+            visualBarsRedCoreElapsed = map(counter, CoreVisualizerTimes[i],CoreVisualizerTimes[i]+15, 0,1);
+            visualBarsFlash2RedCore = lerpColor(warningWhite,warningRed, visualBarsRedCoreElapsed);
+            
+            visualBarsRedCoreSizeElapsed = map(counter, CoreVisualizerTimes[i],CoreVisualizerTimes[i]+45, 0,1); 
+            visualBarsFlash2RedCoreTransparent = lerpColor(warningWhite,warningRedTransparent, visualBarsRedCoreElapsed);
+            
+            if (counter > CoreVisualizerTimes[i] && counter < CoreVisualizerTimes[i]+60) {
+               fill(visualBarsFlash2RedCoreTransparent);
+               rect(CoreVisualizerX,0, (width/96)+visualBarsRedCoreSizeElapsed*width/100,(height/5)*(0.05)+coreBarValue+visualBarsRedCoreSizeElapsed*width/100);
+               rect(-CoreVisualizerX,0, (width/96)+visualBarsRedCoreSizeElapsed*width/100,(height/5)*(0.05)+coreBarValue+visualBarsRedCoreSizeElapsed*width/100);
+            }
+            fill(visualBarsFlash2RedCore);
+         } else {
+            fill(0,0);
+         }
+
+         rect(CoreVisualizerX,0, (width/96),(height/5)*(0.05)+coreBarValue);
+         rect(-CoreVisualizerX,0, (width/96),(height/5)*(0.05)+coreBarValue);
+         CoreVisualizerX -= width/48;
+      }
+
+      for (let j = 0; j < 4; j++) {
+         if (counter > 4470) {
+            visualBarsBlueCoreElapsed = map(counter, 4470,4650, 0,1);
+            visualBarsFlash2BlueCore = lerpColor(warningWhite,warningCyan, visualBarsBlueCoreElapsed);
+            visualBarsFlash2BlueCoreTransparent = lerpColor(warningWhite,warningCyanTransparent, visualBarsBlueCoreElapsed);
+
+            visualBarsBlueCoreSizeElapsed = map(counter, 4470,4538, 0,1);
+
+            if (counter > 4470 && counter < 4751) {
+               fill(visualBarsFlash2BlueCoreTransparent);
+               if (j == 0) {
+                  rect(CoreVisualizerX,0, (width/96)+visualBarsBlueCoreSizeElapsed*width/250,(height/5)*(0.05)+(vocal*.25)/75*(height/5)+visualBarsBlueCoreSizeElapsed*width/250);
+                  rect(-CoreVisualizerX,0, (width/96)+visualBarsBlueCoreSizeElapsed*width/250,(height/5)*(0.05)+(vocal*.25)/75*(height/5)+visualBarsBlueCoreSizeElapsed*width/250);
+               } else {
+                  rect(CoreVisualizerX,0, (width/96)+visualBarsBlueCoreSizeElapsed*width/250,(height/5)*(0.05)+visualBarsBlueCoreSizeElapsed*width/250);
+                  rect(-CoreVisualizerX,0, (width/96)+visualBarsBlueCoreSizeElapsed*width/250,(height/5)*(0.05)+visualBarsBlueCoreSizeElapsed*width/250);
+               }
+            }
+            fill(visualBarsFlash2BlueCore);
+         }
+
+         if (j == 0) {
+            rect(CoreVisualizerX,0, (width/96),(height/5)*(0.05)+(vocal*.25)/75*(height/5));
+            rect(-CoreVisualizerX,0, (width/96),(height/5)*(0.05)+(vocal*.25)/75*(height/5));
+         } else {
+            rect(CoreVisualizerX,0, (width/96),(height/5)*(0.05));
+            rect(-CoreVisualizerX,0, (width/96),(height/5)*(0.05));
+         }
+         CoreVisualizerX -= width/48;
+      }
+
+   }
+
+   //Box to hide Visualizer Bars Temporarily
+   if (counter > 6144) {
+      barsHide = map(counter, 6144,6312, 0,1);
+      barsHideColor = lerpColor(color(20,0),color(20,255),barsHide);
+      fill(barsHideColor);
+      rect(0,0, width, height);
    }
 
    //Rising Blasts
@@ -266,9 +428,6 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
          rect((width/2)+warningHoriOffset-609, -warningRiseOffset+(9*height/2), 176,height*2);
       }
       //Phase Two
-      /*if (counter > 3258 && counter < 3276) {
-         warningHoriOffset-=0.5;
-      }*/
       //Rising 05
       if (counter > 3276 && counter < 3600 && warningRiseOffset < height*5) {
             warningRiseOffset += height/20;
@@ -285,14 +444,14 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
       }
       //Rising 07
       if (counter > 3954) {
-         if (counter < 4302 && warningRiseOffset < height*7) {
+         if (counter < 4308 && warningRiseOffset < height*7) {
             warningRiseOffset += height/20;
          }
          rect((-width/2)-warningHoriOffset+1131, -warningRiseOffset+(15*height/2), 176,height*2);
          rect((width/2)+warningHoriOffset-1131, -warningRiseOffset+(15*height/2), 176,height*2);
       }
       //Rising 08
-      if (counter > 4302) {
+      if (counter > 4308) {
          if (warningRiseOffset < height*8) {
             warningRiseOffset += height/20;
          }
@@ -301,7 +460,13 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
       }
    }
 
-
+   //Box to hide Everything Temporarily During RisingBlasts
+   if (counter > 3096 && counter < 3258) {
+      barsHide = map(counter, 3096,3276, 0,.75);
+      barsHideColor = lerpColor(color(20,0),color(20,255),barsHide);
+      fill(barsHideColor);
+      rect(0,0, width, height);
+   }
 
    //The Core
 
@@ -324,9 +489,10 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
       BarVocal = map(vocal, 0,100, coreSizeBase*1.25,coreSizeBase*1.75);
       BarDrum = map(drum, 0,100, coreSizeBase*1.25,coreSizeBase*1.75);
       BarBass = map(bass, 0,100, coreSizeBase*1.25,coreSizeBase*1.75);
-      BarOther = map(other, 0,100, coreSizeBase*1.25,coreSizeBase*1.75);
-      if (counter > 7410 && bar_fadeout_elapsed > 1) {
-      bar_fadeout_elapsed -=1;
+      if (counter > 6330 && counter < 7410 && bar_fadeout_elapsed < 100) {
+      bar_fadeout_elapsed+=10;
+      } else if (counter > 7410 && bar_fadeout_elapsed > 1) {
+      bar_fadeout_elapsed--;
       }
       for (let i = 0; i < 120; i++) {
          fill(113,225,255);
@@ -336,7 +502,7 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
          rotate(3);                                                                                                 
          rect(0,0, 5,BarBass*(bar_fadeout_elapsed/100));
          rotate(3);
-         rect(0,0, 5,BarOther*(bar_fadeout_elapsed/100));
+         rect(0,0, 5,BarDrum*(bar_fadeout_elapsed/100));
          rotate(3);
       }
    }
@@ -347,27 +513,19 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
       if (coreSizeBase < chargeSizeBase && counter < 6144) {
          coreSizeBase++;
       } else if (coreSizeBase > 28 && counter > 6144 && counter < 6330) {
-         coreSizeBase-=14;
+         coreSizeBase-=7;
       } else if (counter == 6330) {
-         coreSizeBase = 250;
+         coreSizeBase = 150;
       } else if (counter > 6330 && counter < 7410) {
          coreSizeBase+=0.5;
       }
 
-      if (counter <= 6330) {
-         coreSize = map(vocal, 0,100, coreSizeBase*1,coreSizeBase*1.25);
-         fill(255);
-         circle(0,0, coreSize);
+      coreSize = map(vocal, 0,100, coreSizeBase*1,coreSizeBase*1.25);
+      fill(255);
+      circle(0,0, coreSize);
 
-         coreSize2 = map(vocal, 0,100, coreSizeBase*1.1,coreSizeBase*1.35);
-         fill(100,200,255,128);
-         circle(0,0, coreSize2);
-      } else {
-         fill(255);
-         circle(0,0, coreSizeBase);
-         fill(100,200,255,128);
-         circle(0,0, coreSizeBase*1.1);
+      coreSize2 = map(vocal, 0,100, coreSizeBase*1.1,coreSizeBase*1.35);
+      fill(100,200,255,128);
+      circle(0,0, coreSize2);
       }
-   }
-
 }
