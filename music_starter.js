@@ -64,8 +64,11 @@ let twinkleRotation = 0;
 
 let balconyY = 0;
 let bridgeY = 0;
+let bridgeCollapseSilence = 1;
 
 let FinaleY = 0;
+let finaleVisualizerTimes = [10218,10236,10260,10278, 10302,10326,10350,10368, 10392,10410,10434,10458, 10476,10500,10518,10542];
+let finaleVisualizerHideTimes = [10605,10620,10644,10677];
 
 function twinkle(x,y, spikeSizeX=40,spikeSizeY=40, centerThicknessX=10,centerThicknessY=10) {
 
@@ -145,6 +148,7 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
 
       balconyY = height;
       bridgeY = height/3;
+      bridgeCollapseSilence = 1;
 
       FinaleY = 0;
    }
@@ -599,7 +603,7 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
          particleCurrentPosX = map(counter, 4470+(i),4620+(i), particleListX[i],0, true);
          particleCurrentPosY = map(counter, 4470+(i),4620+(i), particleListY[i],0, true);
          
-         if (counter < 4620+(i)) {
+         if (counter > 4470+i && counter < 4620+(i)) {
             circle(particleCurrentPosX,particleCurrentPosY, 5);
          }
       }
@@ -611,7 +615,7 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
       for (let i = 0; i < 1080; i++) {
          particleBlastCurrentPosX = map(counter, 6330+(i),6390+(i), 0,particleListX[i], true);
          particleBlastCurrentPosY = map(counter, 6330+(i),6390+(i), 0,particleListY[i], true);
-         if (counter < 6390+(i)) {
+         if (counter > 6330+i && counter < 6390+(i)) {
             circle(particleBlastCurrentPosX,particleBlastCurrentPosY, 12);
          }
       }
@@ -682,10 +686,10 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
    //Box to semi-obscure Core after the Explosion
    if (counter > 7380 && counter < 9516) {
       CoreMask = map(counter, 7380,7470, 0,1);
-      CoreMaskColor = lerpColor(color(20,0),color(20,64),CoreMask);
+      CoreMaskColor = lerpColor(color(20,0),color(20,72),CoreMask);
       CoreMask2 = map(counter, 8778,8862, 1,0);
-      CoreMaskColor2 = lerpColor(color(20,0),color(20,64),CoreMask2);
-      if (counter > 8777) {fill(CoreMaskColor2);} else if (counter < 7470) {fill(CoreMaskColor);} else {fill(20,64)}
+      CoreMaskColor2 = lerpColor(color(20,0),color(20,72),CoreMask2);
+      if (counter > 8777) {fill(CoreMaskColor2);} else if (counter < 7470) {fill(CoreMaskColor);} else {fill(20,72)}
       rect(0,0, width, height);
    }   
    //Foreground
@@ -724,14 +728,15 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
       rect(0,balconyY, width,(height/4));
 
    //BalconyVisualizerBars
+      if (counter > 8160 && counter < 8185) {bridgeCollapseSilence = map(counter, 8160,8172, 1,0, true);} else {bridgeCollapseSilence = 1;}
       let balconyBarsX = -width/2;
       balconyBarsYSizeDrum = map(drum, 0,100, 0,height/3);
       balconyBarsColor = lerpColor(color(20), color(100,200,255), CoreMask2);
       balconyBarDrumHeightDiv = 1;
       if (counter > 8777) {fill(balconyBarsColor);} else {fill(100,200,255);}
       for (let i = 0; i < 25; i++) {
-         rect(balconyBarsX, balconyY-(height/3)-(height/96)-(balconyBarsYSizeDrum*balconyBarDrumHeightDiv)/2, width/75,balconyBarsYSizeDrum*balconyBarDrumHeightDiv);
-         rect(-balconyBarsX, balconyY-(height/3)-(height/96)-(balconyBarsYSizeDrum*balconyBarDrumHeightDiv)/2, width/75,balconyBarsYSizeDrum*balconyBarDrumHeightDiv);
+         rect(balconyBarsX, balconyY-(height/3)-(height/96)-((balconyBarsYSizeDrum*balconyBarDrumHeightDiv)/2)*bridgeCollapseSilence, width/75,balconyBarsYSizeDrum*balconyBarDrumHeightDiv*bridgeCollapseSilence);
+         rect(-balconyBarsX, balconyY-(height/3)-(height/96)-((balconyBarsYSizeDrum*balconyBarDrumHeightDiv)/2)*bridgeCollapseSilence, width/75,balconyBarsYSizeDrum*balconyBarDrumHeightDiv*bridgeCollapseSilence);
          balconyBarsX+=width/50;
          balconyBarDrumHeightDiv = balconyBarDrumHeightDiv/1.25;
       }
@@ -740,27 +745,35 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
       balconyBarsColorTransparent = lerpColor(color(20,128), color(100,200,255,128), CoreMask2);
       balconyBarBassHeightDiv = 90;
       if (counter > 8777) {fill(balconyBarsColorTransparent);} else {fill(100,200,255,128);}
-      rect(0, balconyY-(height/3)-(height/96)-(balconyBarsYSizeBass)/2, width/75,balconyBarsYSizeBass);
+      rect(0, balconyY-(height/3)-(height/96)-((balconyBarsYSizeBass)/2)*bridgeCollapseSilence, width/75,balconyBarsYSizeBass*bridgeCollapseSilence);
       balconyBarsX = width/50;
       for (let i = 0; i < 25; i++) {
-         rect(balconyBarsX, balconyY-(height/3)-(height/96)-(balconyBarsYSizeBass*(sin(balconyBarBassHeightDiv*2)+1))/2, width/75,balconyBarsYSizeBass*(sin(balconyBarBassHeightDiv*2)+1));
-         rect(-balconyBarsX, balconyY-(height/3)-(height/96)-(balconyBarsYSizeBass*(sin(balconyBarBassHeightDiv*2)+1))/2, width/75,balconyBarsYSizeBass*(sin(balconyBarBassHeightDiv*2)+1));
+         rect(balconyBarsX, balconyY-(height/3)-(height/96)-(balconyBarsYSizeBass*((sin(balconyBarBassHeightDiv*2)+1))/2)*bridgeCollapseSilence, width/75,balconyBarsYSizeBass*(sin(balconyBarBassHeightDiv*2)+1)*bridgeCollapseSilence);
+         rect(-balconyBarsX, balconyY-(height/3)-(height/96)-(balconyBarsYSizeBass*((sin(balconyBarBassHeightDiv*2)+1))/2)*bridgeCollapseSilence, width/75,balconyBarsYSizeBass*(sin(balconyBarBassHeightDiv*2)+1)*bridgeCollapseSilence);
          balconyBarsX+=width/50;
          balconyBarBassHeightDiv += 4;
       }
 
       balconyBarsYSizeOther = map(other, 0,100, 0,height/5);
       if (counter > 8777) {fill(balconyBarsColor);} else {fill(100,200,255);}
-      rect(0, balconyY-(height/3)-(height/96)-(balconyBarsYSizeOther)/2, width/75,balconyBarsYSizeOther);
+      rect(0, balconyY-(height/3)-(height/96)-((balconyBarsYSizeOther)/2)*bridgeCollapseSilence, width/75,balconyBarsYSizeOther*bridgeCollapseSilence);
       balconyBarsX = width/50;
       balconyBarBassHeightDiv = 90;
       for (let i = 0; i < 25; i++) {
-         rect(balconyBarsX, balconyY-(height/3)-(height/96)-(balconyBarsYSizeOther*(sin(balconyBarBassHeightDiv*2)+1))/2, width/75,balconyBarsYSizeOther*(sin(balconyBarBassHeightDiv*2)+1));
-         rect(-balconyBarsX, balconyY-(height/3)-(height/96)-(balconyBarsYSizeOther*(sin(balconyBarBassHeightDiv*2)+1))/2, width/75,balconyBarsYSizeOther*(sin(balconyBarBassHeightDiv*2)+1));
+         rect(balconyBarsX, balconyY-(height/3)-(height/96)-(balconyBarsYSizeOther*((sin(balconyBarBassHeightDiv*2)+1))/2)*bridgeCollapseSilence, width/75,balconyBarsYSizeOther*(sin(balconyBarBassHeightDiv*2)+1)*bridgeCollapseSilence);
+         rect(-balconyBarsX, balconyY-(height/3)-(height/96)-(balconyBarsYSizeOther*((sin(balconyBarBassHeightDiv*2)+1))/2)*bridgeCollapseSilence, width/75,balconyBarsYSizeOther*(sin(balconyBarBassHeightDiv*2)+1)*bridgeCollapseSilence);
          balconyBarsX+=width/50;
          balconyBarBassHeightDiv += 4;
       }
+      noStroke();
+   }
 
+ //FlashBox During OutsideSection
+   if (counter > 8184 && counter < 8215) {
+      FlashMap = map(counter, 8184,8214, 0.75,1);
+      FlashColor = lerpColor(color(255,255),color(255,0),FlashMap);
+      fill(FlashColor);
+      rect(0,0, width, height);
    }
 
    //FadeToFinale
@@ -768,6 +781,78 @@ function draw_one_frame(words, vocal, drum, bass, other, counter) {
       FinaleTime = map(counter, 9456, 9516, 0,1);
       FinaleColor = lerpColor(color(100,200,255,0), color(100,200,255), FinaleTime);
       fill(FinaleColor);
+      rect(0,0, width, height);
+   }
+
+   //SupportFrame
+   if (counter > 9515 && counter < 11000) {
+      fill(64);
+      rect(width*.4,(height/2), width*.05,height*1.75);
+      rect(-width*.4,(height/2), width*.05,height*1.75);
+      rect(0,-height*.35, width*.9,height*.1);
+   }
+
+   //Fade To Hide Support Frame
+   if (counter > 10392 && counter < 11000) {
+      FrameHide = map(counter, 10392, 10525, 0,1);
+      FrameHideColor = lerpColor(color(20,0), color(20), FrameHide);
+      fill(FrameHideColor);
+      rect(0,0, width, height);
+   }
+
+   //FinaleVisualizer
+   if (counter > 10218 && counter < 11000) {
+      
+      for (let i = 0; i < 16; i++) {
+         
+         if (counter > finaleVisualizerTimes[i]) {
+            finaleBarsBlueElapsed = map(counter, finaleVisualizerTimes[i],finaleVisualizerTimes[i]+15, 0,1);
+            finaleBarsFlash2Blue = lerpColor(warningWhite,warningCyan, finaleBarsBlueElapsed);
+            
+            finaleBarsBlueSizeElapsed = map(counter, finaleVisualizerTimes[i],finaleVisualizerTimes[i]+45, 0,1); 
+            finaleBarsFlash2BlueTransparent = lerpColor(warningWhite,warningCyanTransparent, finaleBarsBlueSizeElapsed);
+
+            if (counter > finaleVisualizerTimes[i] && counter < finaleVisualizerTimes[i]+60) {
+               fill(finaleBarsFlash2BlueTransparent);
+
+               if (finaleVisualizerTimes[i] < 10380) {
+                  rect(-width/2,(height/2)-(height/16)-(i*height/8), (width*0.2)+finaleBarsBlueSizeElapsed*width/100,(height/9)+finaleBarsBlueSizeElapsed*width/100);
+               } else {
+                  rect(width/2,(height/2)-(height/16)-((i-8)*height/8), (width*0.2)+finaleBarsBlueSizeElapsed*width/100,(height/9)+finaleBarsBlueSizeElapsed*width/100);
+               }
+            }
+
+            fill(finaleBarsFlash2Blue);
+         } else {
+            fill(0,0);
+         }
+
+         if (finaleVisualizerTimes[i] < 10380) {
+            rect(-width/2,(height/2)-(height/16)-(i*height/8), width*0.2,height/9);
+         } else {
+            rect(width/2,(height/2)-(height/16)-((i-8)*height/8), width*0.2,height/9);
+         }
+      }
+   }
+
+   if (counter > 10605 && counter < 11000) {
+      for (let i = 0; i < 4; i++) {
+         if (counter > finaleVisualizerHideTimes[i]) {
+            hideBarsElapsed = map(counter, finaleVisualizerHideTimes[i],finaleVisualizerHideTimes[i]+60, 0,1);
+            hideBarsColor = lerpColor(color(20,0),color(20), hideBarsElapsed);
+            fill(hideBarsColor);
+         } else {
+            fill(0,0);
+         }
+         rect(0,(height/2)-(height/8)-(i*height/4), width,height/4);
+      }
+   }
+
+   //DarrkBox for FinaleVisualizers
+   if (counter > 10560 && counter < 10591) {
+      FlashMap = map(counter, 10560,10590, 0.5,1);
+      FlashColor = lerpColor(color(20,255),color(20,0),FlashMap);
+      fill(FlashColor);
       rect(0,0, width, height);
    }
 
